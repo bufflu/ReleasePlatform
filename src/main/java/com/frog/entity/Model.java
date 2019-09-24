@@ -1,5 +1,7 @@
 package com.frog.entity;
 
+import com.frog.verifybean.VerifiableBean;
+
 import java.time.LocalDateTime;
 import java.io.Serializable;
 
@@ -11,6 +13,7 @@ import java.io.Serializable;
  * @author bufflu
  * @since 2019-09-23
  */
+@VerifiableBean(exclude = {"id", "date"})
 public class Model implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -21,7 +24,7 @@ public class Model implements Serializable {
 
     private String port;
 
-    private String describe;
+    private String description;
 
     private String owner;
 
@@ -48,13 +51,15 @@ public class Model implements Serializable {
     public void setPort(String port) {
         this.port = port;
     }
-    public String getDescribe() {
-        return describe;
+
+    public String getDescription() {
+        return description;
     }
 
-    public void setDescribe(String describe) {
-        this.describe = describe;
+    public void setDescription(String description) {
+        this.description = description;
     }
+
     public String getOwner() {
         return owner;
     }
@@ -76,7 +81,7 @@ public class Model implements Serializable {
             "id=" + id +
             ", name=" + name +
             ", port=" + port +
-            ", describe=" + describe +
+            ", description=" + description +
             ", owner=" + owner +
             ", date=" + date +
         "}";

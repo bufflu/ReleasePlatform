@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../remind.ico">
+
+    <title>模块列表</title>
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="../css/navbar.css" rel="stylesheet">
+
+    <!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
+    <script src="../../js/jquery-1.11.3.min.js"></script>
+    <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
+    <script src="../../js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+    <div class="navbar"></div>
+
+    <div class="container">
+        <form class="form-inline">
+            <button type="button" class="btn btn-success btn-default" data-toggle="modal" data-target="#myModal">添 加</button>
+            <span style="width: 20px; margin-left: 20px"></span>
+            <div class="form-group">
+                <label class="sr-only" for="modelname">请输入模块名</label>
+                <input type="text" class="form-control" id="modelname" placeholder="请输入模块名">
+            </div>
+            <button type="button" class="btn btn-info btn-default" id="search">查 询</button>
+        </form>
+
+        <div id="table1"></div>
+
+    </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button id="close1" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">添 加</h4>
+                </div>
+                <div class="modal-body">
+                    <div style="width: 80%; margin: 20px 50px">
+                        <form action="javascript:void(0)" id="saveform">
+
+                            <div class="form-group">
+                                <label class="control-label" for="name">模块名称</label>
+                                <input type="text" class="form-control" id="name" name="name" placeholder="model name">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label" for="port">端口</label>
+                                <input type="text" class="form-control" id="port" name="port" placeholder="10000">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label" for="owner">开发者</label>
+                                <input type="text" class="form-control" id="owner" name="owner" placeholder="owner">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label" for="description">描述</label>
+                                <textarea class="form-control" id="description" name="description" ></textarea>
+                            </div>
+
+
+                        </form>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn-sm" data-dismiss="modal" id="close2">关 闭</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="save">保 存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    $(document).ready(function() {
+        refresh(name);
+    });
+
+    function refresh(name) {
+        $.ajax({
+            type: "POST",
+            url: "/model/page/1/10",
+            async: false,
+            dataType: "json",
+            data: "name=" + name,
+            success: function(result) {
+                if (result.success) {
+                    var data = result.data;
+                    list(data);
+                } else {
+                    alert(result.message);
+                }
+            }
+        });
+    }
+
+    function list(data) {
+        var tr = "<table class=\"table table-hover table-bordered\" id=\"table\" style=\"margin-top: 20px\">\n" +
+            "            <thead>\n" +
+            "                <tr>\n" +
+            "                    <th>序号</th>\n" +
+            "                    <th>模块名称</th>\n" +
+            "                    <th>端口</th>\n" +
+            "                    <th>描述</th>\n" +
+            "                    <th>开发者</th>\n" +
+            "                    <th>更新时间</th>\n" +
+            "                    <th>操作</th>\n" +
+            "                </tr>\n" +
+            "            </thead>\n";
+        if (data.length > 0) {
+            tr += "<tbody>";
+            for (var i = 0; i < data.length; i++) {
+                tr += "<tr id=\"" + data[i].id + "\" onclick=\"opennode('" + data[0].id + "')\">" +
+                    "<td>" + (i+1) + "</td>" +
+                    "<td>" + data[i].name + "</td>" +
+                    "<td>" + data[i].port + "</td>" +
+                    "<td>" + data[i].description + "</td>" +
+                    "<td>" + data[i].owner + "</td>" +
+                    "<td>" + formatDate(data[i].date) + "</td>" +
+                    "<td>" +
+                    "<button type=\"button\" class=\"btn btn-info btn-xs\" onclick=\"update('" + data[i].id + "')\">修 改</button>" +
+                    " <button type=\"button\" class=\"btn btn-info btn-xs\" onclick=\"remove('" + data[i].id + "')\">删 除</button>" +
+                    " <button type=\"button\" class=\"btn btn-info btn-xs\" onclick=\"addnode('" + data[i].id + "')\">添加节点</button>" +
+                    "</td>" +
+                    "</tr>";
+            }
+            tr += "</tbody>";
+        } else {
+            tr += "<h5 style='color: #2b669a'>&nbsp;&nbsp;没有数据</h5>"
+        }
+        tr += "</table>";
+        $("#table1").html(tr);
+    }
+
+    function formatDate(date) {
+        var d = date.split(".");
+        return d[0].replace("T"," ");
+    }
+
+    $("#search").click(function () {
+        var name = $("#modelname").val();
+        refresh(name);
+    });
+
+    function remove(id) {
+        //alert(id);
+        $.ajax({
+            type: "DELETE",
+            url: "/remind/remove/" + id,
+            dataType: "json",
+            success: function(result) {
+                if (result.success) {
+                    window.location.href = "/list.html?date=" + $("#date").html();
+                } else {
+                    alert(result.message);
+                }
+            }
+        });
+    }
+
+
+    $("#save").click(function () {
+        //alert(JSON.stringify($('#saveform').serializeObject()));
+        $.ajax({
+            type: "POST",
+            url: "/model/add",
+            dataType: "json",
+            contentType: 'application/json',
+            data: JSON.stringify($('#saveform').serializeObject()),
+            success: function(result) {
+                if (result.success) {
+                    window.location.href = "/list.html";
+                } else {
+                    alert(result.message);
+                }
+            }
+        });
+    });
+
+    $.fn.serializeObject = function(){
+        var o = {};
+        var a = this.serializeArray();
+        $.each(a, function() {
+            if (o[this.name] !== undefined) {
+                if (!o[this.name].push) {
+                    o[this.name] = [o[this.name]];
+                }
+                o[this.name].push(this.value || '');
+            } else {
+                o[this.name] = this.value || '';
+            }
+        });
+        return o;
+    };
+
+    function opennode(id) {
+        //alert(id);
+        /*$.ajax({
+            type: "DELETE",
+            url: "/remind/remove/" + id,
+            dataType: "json",
+            success: function(result) {
+                if (result.success) {
+                    window.location.href = "/list.html?date=" + $("#date").html();
+                } else {
+                    alert(result.message);
+                }
+            }
+        });*/
+        console.info($("#" + id +""));
+    }
+</script>
+</html>

@@ -1,5 +1,7 @@
 package com.frog.entity;
 
+import com.frog.verifybean.VerifiableBean;
+
 import java.io.Serializable;
 
 /**
@@ -10,6 +12,7 @@ import java.io.Serializable;
  * @author bufflu
  * @since 2019-09-23
  */
+@VerifiableBean(exclude = {"id", "describe"})
 public class Package implements Serializable {
 
     private static final long serialVersionUID = 1L;
